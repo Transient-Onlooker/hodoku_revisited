@@ -122,7 +122,7 @@ export function SettingsSheet({ settings, onChange, onResetNotes, onClearNotes, 
         <details className="about">
           <summary>About and license</summary>
           <p>
-            Hodoku Revisited is based on <a href="https://hodoku.sourceforge.net/">HoDoKu</a> by Bernhard Hobiger (2008-12).
+            Hodoku Revisited is part of <a href="https://revisitedlabs.com/" target="_blank" rel="noopener noreferrer">Revisited Labs</a> and based on <a href="https://hodoku.sourceforge.net/">HoDoKu</a> by Bernhard Hobiger (2008-12).
             Copyright (C) 2026 Hodoku Revisited contributors. This program comes with ABSOLUTELY NO WARRANTY. It is free software
             under the GNU General Public License, version 3 or later; you may redistribute it under those terms. Not affiliated with
             or endorsed by the original author.
