@@ -56,6 +56,7 @@ function page({ title, description, root, body, path, wide, jsonld }) {
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="google-adsense-account" content="ca-pub-6409516653999633">
 <meta name="msvalidate.01" content="154ADF6C231F0A051ADFE027C55A9FFF">
 <title>${esc(title)}</title>
 <meta name="description" content="${esc(description)}">
@@ -93,11 +94,11 @@ ${body}
 <footer>
   <p>Free sudoku solver, based on HoDoKu by Bernhard Hobiger. Free software under the GPL (GPL-3.0-or-later), with no warranty.</p>
   <p style="font-size:.75rem;color:var(--muted);margin-top:8px">
-    More tools:
-    <a href="https://hodokurevisited.com/" target="_blank" rel="noopener noreferrer">Hodoku Revisited</a> ·
+    Part of <a href="https://revisitedlabs.com/" target="_blank" rel="noopener noreferrer"><strong>Revisited Labs</strong></a>:
+    <a href="https://logisimrevisited.com/" target="_blank" rel="noopener noreferrer">Logisim Revisited</a> ·
     <a href="https://kakurorevisited.com/" target="_blank" rel="noopener noreferrer">Kakuro Revisited</a> ·
     <a href="https://nonogramrevisited.com/" target="_blank" rel="noopener noreferrer">Nonogram Revisited</a> ·
-    <a href="https://logisimrevisited.com/" target="_blank" rel="noopener noreferrer">Logisim Revisited</a>
+    <a href="https://dolcecolore.com/" target="_blank" rel="noopener noreferrer">Dolce Colore</a>
   </p>
   <p><a href="${REPO}">GitHub</a> · <a href="${REPO}/commits/main">Changelog</a> · <a href="https://hodoku.sourceforge.net/">Original site</a> · <a href="${root}about">About and license</a> · <a href="${root}privacy">Privacy</a></p>
 </footer>
