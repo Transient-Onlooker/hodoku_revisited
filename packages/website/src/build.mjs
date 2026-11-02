@@ -683,7 +683,10 @@ writeFileSync(
         target: {
           namespace: 'android_app',
           package_name: 'com.revisitedlabs.hodoku',
-          sha256_cert_fingerprints: ['PLACEHOLDER_SHA256_CERT_FINGERPRINT'],
+          sha256_cert_fingerprints: [
+            'DB:D8:6C:C6:6A:8D:8C:14:93:90:6C:10:8D:22:F5:2F:3A:58:37:C4:32:54:DB:E7:A5:46:F8:44:5B:05:B6:CE',
+            'F7:B2:0B:B9:2A:48:22:C9:8A:B2:A7:1A:60:94:54:51:17:B6:EB:78:BD:69:92:FC:10:64:A8:6D:AF:5D:AD:0A',
+          ],
         },
       },
     ],

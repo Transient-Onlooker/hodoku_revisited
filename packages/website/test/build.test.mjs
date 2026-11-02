@@ -177,5 +177,5 @@ test('emits an Android App Links template', () => {
   assert.equal(links[0].relation[0], 'delegate_permission/common.handle_all_urls');
   assert.equal(links[0].target.namespace, 'android_app');
   assert.equal(links[0].target.package_name, 'com.revisitedlabs.hodoku');
-  assert.equal(links[0].target.sha256_cert_fingerprints[0], 'PLACEHOLDER_SHA256_CERT_FINGERPRINT');
+  assert.ok(links[0].target.sha256_cert_fingerprints.includes('DB:D8:6C:C6:6A:8D:8C:14:93:90:6C:10:8D:22:F5:2F:3A:58:37:C4:32:54:DB:E7:A5:46:F8:44:5B:05:B6:CE'));
 });
