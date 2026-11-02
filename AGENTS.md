@@ -119,6 +119,14 @@ Edit the sources, not these outputs.
   that touch the same lines (the GitHub Actions in `ci.yml` and `pages.yml`) are easier to land as one PR.
 - Keep the committer email a GitHub no-reply address; do not commit work or private addresses.
 
+## Branding and sister sites
+
+Hodoku Revisited is part of **[Revisited Labs](https://revisitedlabs.com)**.
+- Follow the master brand identity and design tokens defined in `c:\dev\revisited_labs\BRAND.md` and `c:\dev\revisited_labs\docs\brand-guidelines.md`.
+- Keep user-facing copy in **American spelling**.
+- Always refer to the coach as a **Symbolic AI Coach** or **Socratic Coach** (not a chatbot or LLM); solving logic is deterministic and runs locally.
+- Maintain the footer endorsement link to `https://revisitedlabs.com` and cross-links to sister sites (`logisimrevisited.com`, `kakurorevisited.com`, `nonogramrevisited.com`).
+
 ## Documentation and licensing
 
 - Keep `docs/PORT-PLAN.md` (status and backlog), `README.md`, and the website manual truthful as
