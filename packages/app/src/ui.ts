@@ -1,6 +1,7 @@
 import type { HintLevel } from './protocol';
 
 export type Mode = 'value' | 'notes' | 'filter' | 'color';
+export type NotesToggleKey = 'n' | 'Tab' | 'Enter';
 
 /** The original's three game modes: plain play, learning (auto-solve to the technique) and practicing. */
 export type GameMode = 'playing' | 'learning' | 'practising';
@@ -28,6 +29,8 @@ export interface Settings {
   cellZoom: boolean;
   /** mark the cells whose candidate marks differ from what the placed values allow */
   showDeviations: boolean;
+  /** Optional extra Value/Notes toggle key; N always works. */
+  notesToggleKey?: NotesToggleKey;
   theme: Theme;
   /** the original's game mode; 'playing' is the plain mode */
   gameMode: GameMode;
@@ -54,6 +57,7 @@ export const DEFAULT_SETTINGS: Settings = {
   colorKuColors: DEFAULT_COLORKU_COLORS,
   cellZoom: false,
   showDeviations: false,
+  notesToggleKey: 'n',
   theme: 'system',
   gameMode: 'playing',
   trainingTechniques: [],

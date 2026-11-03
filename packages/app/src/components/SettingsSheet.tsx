@@ -1,6 +1,6 @@
 import { HINT_LEVEL_NAMES, LEVEL_NAMES } from '../protocol';
 import { TECHNIQUE_GROUPS } from '../techniqueGroups';
-import { DEFAULT_COLORKU_COLORS, type Settings, type Theme } from '../ui';
+import { DEFAULT_COLORKU_COLORS, type NotesToggleKey, type Settings, type Theme } from '../ui';
 
 interface Props {
   settings: Settings;
@@ -103,6 +103,15 @@ export function SettingsSheet({ settings, onChange, onResetNotes, onClearNotes, 
             ))}
           </select>
         </label>
+        <label className="field">
+          Toggle Value/Notes with
+          <select value={settings.notesToggleKey ?? 'n'} onChange={(e) => onChange({ ...settings, notesToggleKey: e.target.value as NotesToggleKey })}>
+            <option value="n">N (default)</option>
+            <option value="Tab">Tab</option>
+            <option value="Enter">Enter</option>
+          </select>
+        </label>
+        <p className="note">N always works. Tab and Enter toggle only when a board cell has focus; Shift+Tab still moves focus.</p>
         <label className="field">
           Theme
           <select value={settings.theme} onChange={(e) => onChange({ ...settings, theme: e.target.value as Theme })}>
