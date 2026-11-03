@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import type { Mode, Tab } from '../ui';
+import type { Mode, NotesToggleKey, Tab } from '../ui';
 
 /** What the keyboard needs from the app. The latest values are read on every key press. */
 export interface Hotkeys {
@@ -8,6 +8,7 @@ export interface Hotkeys {
   tab: Tab;
   selected: number | null;
   hasHint: boolean;
+  notesToggleKey: NotesToggleKey;
   toggleCommands: () => void;
   input: (digit: number) => void;
   eraseSelected: () => void;
@@ -21,6 +22,11 @@ export interface Hotkeys {
   undo: () => void;
   redo: () => void;
   select: (cell: number) => void;
+}
+
+/** N remains available; Tab/Enter only replace their actions while a board cell has focus. */
+export function isNotesToggleShortcut(key: string, configured: NotesToggleKey, onBoard: boolean, shifted: boolean): boolean {
+  return key === 'n' || (key === configured && (configured === 'Tab' || configured === 'Enter') && onBoard && !shifted);
 }
 
 /** The global keyboard shortcuts (see the manual's Keyboard shortcuts chapter). */
@@ -46,7 +52,10 @@ export function useHotkeys(h: Hotkeys): void {
       if (e.altKey) return;
       if (e.key >= '1' && e.key <= '9') k.input(Number(e.key));
       else if (e.key === 'Backspace' || e.key === 'Delete' || e.key === '0') k.eraseSelected();
-      else if (e.key === 'n') k.setMode((m) => (m === 'notes' ? 'value' : 'notes'));
+      else if (isNotesToggleShortcut(e.key, k.notesToggleKey, e.target instanceof Element && e.target.closest('.board') !== null, e.shiftKey)) {
+        if (e.key !== 'n') e.preventDefault();
+        k.setMode((m) => (m === 'notes' ? 'value' : 'notes'));
+      }
       else if (e.key === 'f') k.setMode((m) => (m === 'filter' ? 'value' : 'filter'));
       else if (e.key === 'c') k.setMode((m) => (m === 'color' ? 'value' : 'color'));
       else if (e.key === 'h') k.askHint();

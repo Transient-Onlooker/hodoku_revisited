@@ -216,12 +216,13 @@ export const MANUAL = [
 <tr><td><kbd>↑</kbd> <kbd>↓</kbd> <kbd>←</kbd> <kbd>→</kbd></td><td>Move the selection</td></tr>
 <tr><td><kbd>1</kbd> to <kbd>9</kbd></td><td>Enter a digit (or toggle a note in Notes mode)</td></tr>
 <tr><td><kbd>Backspace</kbd>, <kbd>Delete</kbd>, <kbd>0</kbd></td><td>Erase the selected cell</td></tr>
-<tr><td><kbd>N</kbd></td><td>Switch between Value and Notes</td></tr>
+<tr><td><kbd>N</kbd></td><td>Switch between Value and Notes (always available)</td></tr>
+<tr><td><kbd>Tab</kbd> or <kbd>Enter</kbd> (optional)</td><td>Switch Value/Notes while a grid cell has focus (choose in Settings). Shift+Tab still moves focus.</td></tr>
 <tr><td><kbd>F</kbd></td><td>Switch between Value and Filter</td></tr>
 <tr><td><kbd>C</kbd></td><td>Switch between Value and Color</td></tr>
 <tr><td><kbd>Alt</kbd>+<kbd>1</kbd> to <kbd>9</kbd></td><td>Filter on that digit (again to clear)</td></tr>
 <tr><td><kbd>H</kbd></td><td>Get a hint</td></tr>
-<tr><td><kbd>Enter</kbd></td><td>Apply the hint that is showing</td></tr>
+<tr><td><kbd>Enter</kbd></td><td>Apply the hint that is showing (unless configured to toggle Value/Notes on the board)</td></tr>
 <tr><td><kbd>Esc</kbd></td><td>Dismiss the hint, close a dialog</td></tr>
 <tr><td><kbd>Z</kbd></td><td>Undo</td></tr>
 <tr><td><kbd>Y</kbd></td><td>Redo</td></tr>
@@ -245,6 +246,7 @@ export const MANUAL = [
 <dt>Hints use</dt><dd>The hardest class of technique a hint may use. Also available in the side panel.</dd>
 <dt>Techniques a hint may use</dt><dd>The individual techniques a hint is allowed to use, grouped by difficulty. Untick any you would rather solve yourself; the choice is remembered. <em>Hints use</em> still caps them from above, and <em>Enable all techniques</em> puts everything back.</dd>
 <dt>New puzzle level</dt><dd>The difficulty used by the plain <em>New puzzle</em> button.</dd>
+<dt>Toggle Value/Notes with</dt><dd>Choose N, Tab or Enter. N always works. Tab and Enter only toggle when a board cell has focus; Shift+Tab is reserved for focus navigation.</dd>
 <dt>Theme</dt><dd>Follow the system, or force light or dark.</dd>
 <dt>Clear pencil marks</dt><dd>Remove all the notes you wrote.</dd>\n<dt>Reset candidates</dt><dd>Restore the solver's candidates to everything the placed values allow.</dd>
 <dt>About and license</dt><dd>Where the project comes from, and the GPL text.</dd>

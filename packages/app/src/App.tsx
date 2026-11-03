@@ -380,6 +380,7 @@ export function App() {
     tab,
     selected,
     hasHint: !!(hint || proof),
+    notesToggleKey: settings.notesToggleKey ?? 'n',
     toggleCommands: () => setCommandsOpen((o) => !o),
     input,
     eraseSelected,
