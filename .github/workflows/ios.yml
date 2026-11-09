@@ -1,0 +1,43 @@
+name: Build iOS App
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build-ios:
+    runs-on: macos-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 12
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build web application
+        run: pnpm --filter @hodoku/app build
+
+      - name: Sync Capacitor iOS
+        run: |
+          cd packages/app
+          npx cap sync ios
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Build Xcode project (dry run / verification)
+        run: |
+          cd packages/app/ios/App
+          xcodebuild -project App.xcodeproj -scheme App -destination 'generic/platform=iOS Simulator' clean build CODE_SIGNING_ALLOWED=NO

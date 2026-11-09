@@ -86,7 +86,9 @@ test('sitemap and robots are written when SITE_URL is set', () => {
     assert.ok(ogUrl && !ogUrl[1].endsWith('.html'), `${file}: og:url never ends in .html`);
     assert.ok(!/"(?:url|item)":"[^"]*\.html"/.test(html), `${file}: JSON-LD URLs never end in .html`);
   }
-  assert.match(readFileSync(join(dist, 'robots.txt'), 'utf8'), /Sitemap: https:\/\/example\.org\/sitemap\.xml/);
+  const robots = readFileSync(join(dist, 'robots.txt'), 'utf8');
+  assert.match(robots, /Sitemap: https:\/\/example\.org\/sitemap\.xml/);
+  assert.match(robots, /Disallow: \/play\/\?p=/, 'puzzle permalinks stay out of the crawl');
 });
 
 test('technique pages with a worked example contain a diagram', () => {

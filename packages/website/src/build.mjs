@@ -671,7 +671,10 @@ if (!gated && siteUrl !== '/') {
     join(out, 'sitemap.xml'),
     `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls.map((u) => `<url><loc>${u}</loc></url>`).join('\n')}\n</urlset>\n`,
   );
-  writeFileSync(join(out, 'robots.txt'), `User-agent: *\nAllow: /\nSitemap: ${siteUrl}sitemap.xml\n`);
+  // Puzzle permalinks (?p=...) are an unbounded set of URLs: every board state is a valid
+  // address. They canonicalize to /play/, so keep crawlers out of the space instead of spending
+  // crawl budget on it.
+  writeFileSync(join(out, 'robots.txt'), `User-agent: *\nAllow: /\nDisallow: /play/?p=\nSitemap: ${siteUrl}sitemap.xml\n`);
 }
 // Android App Links: template with placeholder package name and SHA256 signing fingerprint.
 mkdirSync(join(out, '.well-known'), { recursive: true });
