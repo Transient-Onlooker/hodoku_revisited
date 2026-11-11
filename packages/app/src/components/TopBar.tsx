@@ -23,6 +23,7 @@ interface Props {
   onPrintSolution: () => void;
   onExtendedPrint: () => void;
   onExportPng: () => void;
+  onExportReceiptCurrent: () => void;
   onUndo: () => void;
   onRedo: () => void;
   onRestart: () => void;
@@ -117,6 +118,7 @@ export function TopBar(p: Props) {
       {item(close, 'Print solution', p.onPrintSolution)}
       {item(close, 'Extended print…', p.onExtendedPrint)}
       {item(close, 'Export as PNG', p.onExportPng)}
+      {item(close, 'Export current puzzle as 384px receipt ZIP', p.onExportReceiptCurrent, !p.badge)}
     </>
   );
   const newItems = (close: () => void) => (
