@@ -30,7 +30,7 @@ describe('receipt print layout', () => {
     const input = [puzzle(1, 200), puzzle(2, 500), puzzle(3, 1000), puzzle(1, 240)];
     const cards = prepareReceiptCards(input, true, () => 0);
     expect(cards.map((c) => c.puzzle.level)).not.toEqual(input.map((c) => c.level));
-    expect(cards.map((c) => c.puzzle.score).sort()).toEqual([200, 240, 500, 1000]);
+    expect(cards.map((c) => c.puzzle.score).sort((a, b) => a - b)).toEqual([200, 240, 500, 1000]);
     expect(cards.filter((c) => c.puzzle.level === 1).map((c) => c.number)).toEqual([1, 2]);
   });
 
