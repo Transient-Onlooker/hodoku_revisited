@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { RECEIPT_CARD_HEIGHT, RECEIPT_WIDTH, prepareReceiptCards, receiptZip, splitReceiptCards } from '../src/receiptPrint';
+import { RECEIPT_CARD_HEIGHT, RECEIPT_WIDTH, planReceiptStrips, prepareReceiptCards, receiptZip, splitReceiptCards } from '../src/receiptPrint';
 import type { PrintSudoku } from '../src/protocol';
 
 const puzzle = (level: number, score: number): PrintSudoku => ({
@@ -21,17 +21,35 @@ describe('receipt print layout', () => {
   it('numbers puzzles within each level without mutating the input order', () => {
     const input = [puzzle(2, 400), puzzle(1, 300), puzzle(2, 500), puzzle(5, 4000)];
     const cards = prepareReceiptCards(input);
-    expect(cards.map((c) => c.number)).toEqual([1, 1, 2, 1]);
+    expect(cards.map((c) => c.number)).toEqual([1, 2, 1, 1]);
     expect(cards.map((c) => c.order)).toEqual([1, 2, 3, 4]);
+    expect(cards.map((c) => c.puzzle.level)).toEqual([2, 2, 1, 5]);
     expect(input.map((p) => p.level)).toEqual([2, 1, 2, 5]);
   });
 
-  it('can interleave difficulty while preserving score and pairing', () => {
-    const input = [puzzle(1, 200), puzzle(2, 500), puzzle(3, 1000), puzzle(1, 240)];
+  it('shuffles only within difficulty groups, never across them', () => {
+    const input = [puzzle(1, 200), puzzle(2, 500), puzzle(1, 240), puzzle(3, 1000), puzzle(2, 550)];
     const cards = prepareReceiptCards(input, true, () => 0);
-    expect(cards.map((c) => c.puzzle.level)).not.toEqual(input.map((c) => c.level));
-    expect(cards.map((c) => c.puzzle.score).sort((a, b) => a - b)).toEqual([200, 240, 500, 1000]);
-    expect(cards.filter((c) => c.puzzle.level === 1).map((c) => c.number)).toEqual([1, 2]);
+    expect(cards.map((c) => c.puzzle.level)).toEqual([1, 1, 2, 2, 3]);
+    expect(cards.map((c) => c.puzzle.score)).toEqual([240, 200, 550, 500, 1000]);
+    expect(cards.map((c) => c.number)).toEqual([1, 2, 1, 2, 1]);
+    expect(input.map((c) => c.score)).toEqual([200, 500, 240, 1000, 550]);
+  });
+
+  it('creates seven difficulty-homogeneous strips for a 20/30/10/10 batch', () => {
+    const input = [
+      ...Array.from({ length: 20 }, (_, i) => puzzle(1, 100 + i)),
+      ...Array.from({ length: 30 }, (_, i) => puzzle(2, 200 + i)),
+      ...Array.from({ length: 10 }, (_, i) => puzzle(3, 300 + i)),
+      ...Array.from({ length: 10 }, (_, i) => puzzle(5, 500 + i)),
+    ];
+    const strips = planReceiptStrips(prepareReceiptCards(input, true, () => 0));
+    expect(strips).toHaveLength(7);
+    expect(strips.map((s) => s.level)).toEqual([1, 1, 2, 2, 2, 3, 5]);
+    expect(strips.map((s) => s.part)).toEqual([1, 2, 1, 2, 3, 1, 1]);
+    expect(strips.map((s) => s.cards.length)).toEqual(Array(7).fill(10));
+    expect(strips.every((s) => s.cards.every((card) => card.puzzle.level === s.level))).toBe(true);
+    expect(strips.flatMap((s) => s.cards)).toHaveLength(70);
   });
 
   it('splits long jobs into ten-puzzle sheets with no missing puzzles', () => {

@@ -20,18 +20,29 @@ export interface ReceiptCard {
   number: number;
 }
 
-/** Order puzzles for printing, then number each difficulty independently. Never mutates the input. */
+/** Group by difficulty first; optionally shuffle *within* each group. Never mutates the input. */
 export function prepareReceiptCards(
   puzzles: readonly PrintSudoku[],
   shuffle = false,
   random: () => number = Math.random,
 ): ReceiptCard[] {
-  const ordered = [...puzzles];
-  if (shuffle) {
-    for (let i = ordered.length - 1; i > 0; i--) {
-      const j = Math.floor(random() * (i + 1));
-      [ordered[i], ordered[j]] = [ordered[j], ordered[i]];
+  // Preserve the first occurrence of each difficulty, as chosen in Extended Print.
+  const groups = new Map<number, PrintSudoku[]>();
+  for (const puzzle of puzzles) {
+    const group = groups.get(puzzle.level) ?? [];
+    group.push(puzzle);
+    groups.set(puzzle.level, group);
+  }
+  const ordered: PrintSudoku[] = [];
+  for (const group of groups.values()) {
+    if (shuffle) {
+      // Fisher–Yates, independently applied to this difficulty only.
+      for (let i = group.length - 1; i > 0; i--) {
+        const j = Math.min(i, Math.max(0, Math.floor(random() * (i + 1))));
+        [group[i], group[j]] = [group[j], group[i]];
+      }
     }
+    ordered.push(...group);
   }
   const counts = new Map<number, number>();
   return ordered.map((puzzle, i) => {
@@ -48,34 +59,64 @@ export function splitReceiptCards(cards: readonly ReceiptCard[], perStrip = RECE
   return strips;
 }
 
+export interface ReceiptStrip {
+  level: number;
+  part: number;
+  cards: ReceiptCard[];
+}
+
+/** Split each difficulty independently, so no exported strip mixes levels. */
+export function planReceiptStrips(cards: readonly ReceiptCard[], perStrip = RECEIPT_CARDS_PER_STRIP): ReceiptStrip[] {
+  const groups = new Map<number, ReceiptCard[]>();
+  for (const card of cards) {
+    const group = groups.get(card.puzzle.level) ?? [];
+    group.push(card);
+    groups.set(card.puzzle.level, group);
+  }
+  const out: ReceiptStrip[] = [];
+  for (const [level, group] of groups) {
+    splitReceiptCards(group, perStrip).forEach((part, index) =>
+      out.push({ level, part: index + 1, cards: part }),
+    );
+  }
+  return out;
+}
+
+/** Draw 384x476px cards using the original receipt layout and true white background.
+ * Exact local reference fonts: DejaVu Sans Bold 24px title/26px digits,
+ * DejaVu Sans Mono Bold 16px score header. Browser fallback fonts may differ
+ * unless these fonts are installed on the client's device.
+ */
 function drawCard(ctx: CanvasRenderingContext2D, card: ReceiptCard, y: number, answer: boolean): void {
   const { puzzle, number } = card;
-  ctx.fillStyle = '#ebebeb';
+  ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, y, RECEIPT_WIDTH, RECEIPT_CARD_HEIGHT);
 
-  ctx.fillStyle = '#101010';
+  ctx.fillStyle = '#000000';
   ctx.textAlign = 'left';
   ctx.textBaseline = 'top';
-  ctx.font = '700 17px Arial, sans-serif';
-  ctx.fillText('SUDOKU', 13, y + 19);
+  ctx.font = '700 24px "DejaVu Sans", sans-serif';
+  ctx.fillText('SUDOKU', 12, y + 18);
 
-  ctx.font = '700 13px Arial, sans-serif';
-  ctx.textAlign = 'right';
   const label = String(LEVEL_NAMES[puzzle.level] ?? 'Sudoku').toUpperCase();
-  ctx.fillText(label + '  #' + String(number).padStart(2, '0') + '  ' + puzzle.score, 371, y + 24);
+  ctx.font = '700 16px "DejaVu Sans Mono", monospace';
+  ctx.textAlign = 'right';
+  ctx.fillText(label + ' #' + String(number).padStart(2, '0') + ' ' + puzzle.score, 372, y + 22);
 
+  // Source geometry: 4px 3x3 dividers, 1px cell boundaries, pure black.
+  const left = RECEIPT_X_LINES[0] - 2;
+  const top = RECEIPT_Y_LINES[0] - 2;
+  const width = RECEIPT_X_LINES[9] - RECEIPT_X_LINES[0] + 4;
+  const height = RECEIPT_Y_LINES[9] - RECEIPT_Y_LINES[0] + 4;
   for (let i = 0; i <= 9; i++) {
     const thick = i % 3 === 0;
-    const lineWidth = thick ? 3 : 1;
-    ctx.fillStyle = thick ? '#101010' : '#999999';
-    ctx.fillRect(RECEIPT_X_LINES[i] - Math.floor(lineWidth / 2), y + RECEIPT_Y_LINES[0], lineWidth, RECEIPT_Y_LINES[9] - RECEIPT_Y_LINES[0]);
-    ctx.fillRect(RECEIPT_X_LINES[0], y + RECEIPT_Y_LINES[i] - Math.floor(lineWidth / 2), RECEIPT_X_LINES[9] - RECEIPT_X_LINES[0], lineWidth);
+    ctx.fillRect(thick ? RECEIPT_X_LINES[i] - 2 : RECEIPT_X_LINES[i], y + top, thick ? 4 : 1, height);
+    ctx.fillRect(left, y + (thick ? RECEIPT_Y_LINES[i] - 2 : RECEIPT_Y_LINES[i]), width, thick ? 4 : 1);
   }
 
   const digits = answer ? puzzle.solution : [...puzzle.givens].map((v) => (v === '.' || v === '0' ? 0 : Number(v)));
   if (!digits || digits.length !== 81) throw new Error('This puzzle has no 81-cell solution for the answer strip.');
-  ctx.fillStyle = '#0b0b0b';
-  ctx.font = '700 27px Arial, sans-serif';
+  ctx.font = '700 26px "DejaVu Sans", sans-serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   for (let cell = 0; cell < 81; cell++) {
@@ -83,9 +124,9 @@ function drawCard(ctx: CanvasRenderingContext2D, card: ReceiptCard, y: number, a
     if (!digit) continue;
     const row = Math.floor(cell / 9);
     const col = cell % 9;
-    const x = (RECEIPT_X_LINES[col] + RECEIPT_X_LINES[col + 1]) / 2;
-    const yy = y + (RECEIPT_Y_LINES[row] + RECEIPT_Y_LINES[row + 1]) / 2;
-    ctx.fillText(String(digit), x, yy + 1);
+    const x = Math.floor((RECEIPT_X_LINES[col] + RECEIPT_X_LINES[col + 1]) / 2);
+    const yy = y + Math.floor((RECEIPT_Y_LINES[row] + RECEIPT_Y_LINES[row + 1]) / 2);
+    ctx.fillText(String(digit), x, yy + 4);
   }
 }
 
@@ -189,28 +230,38 @@ export function receiptZip(entries: readonly ZipEntry[]): Blob {
   return new Blob([result], { type: 'application/zip' });
 }
 
-/** Export the paired puzzle and answer strips as a single ZIP download. */
+/** Export grouped puzzle sheets followed by their matching answer sheets. */
 export async function downloadReceiptPngs(puzzles: readonly PrintSudoku[], shuffle: boolean): Promise<void> {
   if (puzzles.length === 0) throw new Error('No puzzles to export.');
   const cards = prepareReceiptCards(puzzles, shuffle);
-  const strips = splitReceiptCards(cards);
+  const strips = planReceiptStrips(cards);
   const files: ZipEntry[] = [];
+
   for (let i = 0; i < strips.length; i++) {
-    const group = strips[i];
-    const first = String(group[0].order).padStart(3, '0');
-    const last = String(group[group.length - 1].order).padStart(3, '0');
-    const prefix = String(i + 1).padStart(2, '0') + '_' + first + '-' + last + '_';
-    files.push({ name: prefix + 'puzzles.png', bytes: await makeStrip(group, false) });
-    files.push({ name: prefix + 'answers.png', bytes: await makeStrip(group, true) });
+    const strip = strips[i];
+    const level = String(LEVEL_NAMES[strip.level] ?? 'sudoku').toLowerCase();
+    const part = String(strip.part).padStart(2, '0');
+    const number = String(i + 1).padStart(2, '0');
+    files.push({ name: number + '. ' + level + '_problems_' + part + '.png', bytes: await makeStrip(strip.cards, false) });
   }
+  for (let i = 0; i < strips.length; i++) {
+    const strip = strips[i];
+    const level = String(LEVEL_NAMES[strip.level] ?? 'sudoku').toLowerCase();
+    const part = String(strip.part).padStart(2, '0');
+    const number = String(i + strips.length + 1).padStart(2, '0');
+    files.push({ name: number + '. ' + level + '_answers_' + part + '.png', bytes: await makeStrip(strip.cards, true) });
+  }
+
   files.push({
     name: 'README.txt',
     bytes: new TextEncoder().encode(
       'Hodoku Revisited - 384px thermal receipt export\n' +
-      'Print the numbered puzzle PNGs in filename order. Answer PNGs have matching order and headers.\n' +
+      'Puzzle strips are grouped by difficulty and optionally shuffled *within* that difficulty.\n' +
+      'The puzzle PNGs come first, followed by paired answer PNGs in the same difficulty order.\n' +
       'Each puzzle is 384x476px; strips contain up to 10 puzzles (4760px maximum).\n' +
-      'Difficulty-specific numbers start at #01 within this export. Scores come from the HoDoKu engine.\n' +
-      'Learning/practicing sections export the original givens, not a partly solved training board.\n',
+      'Difficulty numbers start at #01 within each export; scores come from the HoDoKu engine.\n' +
+      'Learning/practicing sections export original givens, not partly solved training boards.\n' +
+      'White background; the original desktop glyphs use DejaVu Sans Bold/DejaVu Sans Mono Bold.\n',
     ),
   });
   const url = URL.createObjectURL(receiptZip(files));

@@ -113,7 +113,7 @@ export function ExtendedPrintDialog({ settings, busy, onPrint, onExportReceipt, 
         </label>
         <label className="field">
           <input type="checkbox" checked={shuffleReceipt} onChange={(e) => setShuffleReceipt(e.target.checked)} />
-          Mix difficulty order in receipt export
+          Shuffle puzzle order within each difficulty
         </label>
         <p className="note">384px receipt PNGs use the original givens, with a matching answer strip and engine rating. Strips contain up to 10 puzzles; both sets download in one ZIP.</p>
         <div className="row">
