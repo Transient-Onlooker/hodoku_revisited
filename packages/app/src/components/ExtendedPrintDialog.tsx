@@ -13,6 +13,7 @@ interface Props {
   settings: Settings;
   busy: boolean;
   onPrint: (sections: PrintSection[], layout: number, rating: boolean, booklet: boolean) => void;
+  onExportReceipt: (sections: PrintSection[], shuffle: boolean) => void;
   onClose: () => void;
 }
 
@@ -30,11 +31,12 @@ function defaultSections(level: number): PrintSection[] {
 const clampCount = (n: number): number => Math.min(30, Math.max(0, Math.floor(Number.isFinite(n) ? n : 0)));
 
 /** Pick up to five sections of puzzles, a layout and the two options, then generate and print them. */
-export function ExtendedPrintDialog({ settings, busy, onPrint, onClose }: Props) {
+export function ExtendedPrintDialog({ settings, busy, onPrint, onExportReceipt, onClose }: Props) {
   const [sections, setSections] = useState<PrintSection[]>(() => defaultSections(settings.level));
   const [layout, setLayout] = useState(0);
   const [rating, setRating] = useState(false);
   const [booklet, setBooklet] = useState(false);
+  const [shuffleReceipt, setShuffleReceipt] = useState(true);
 
   const set = (i: number, patch: Partial<PrintSection>) => setSections((all) => all.map((s, k) => (k === i ? { ...s, ...patch } : s)));
   const changeLayout = (n: number) => {
@@ -44,6 +46,7 @@ export function ExtendedPrintDialog({ settings, busy, onPrint, onClose }: Props)
   };
   const total = sections.reduce((n, s) => n + s.count, 0);
   const print = () => onPrint(sections.filter((s) => s.count > 0), layout, rating, booklet);
+  const receipt = () => onExportReceipt(sections.filter((s) => s.count > 0), shuffleReceipt);
 
   return (
     <div className="modal" role="dialog" aria-label="Extended print" aria-modal="true">
@@ -108,12 +111,18 @@ export function ExtendedPrintDialog({ settings, busy, onPrint, onClose }: Props)
           <input type="checkbox" checked={booklet} disabled={!canBooklet(layout)} onChange={(e) => setBooklet(e.target.checked)} />
           Booklet
         </label>
+        <label className="field">
+          <input type="checkbox" checked={shuffleReceipt} onChange={(e) => setShuffleReceipt(e.target.checked)} />
+          Mix difficulty order in receipt export
+        </label>
+        <p className="note">384px receipt PNGs use the original givens, with a matching answer strip and engine rating. Strips contain up to 10 puzzles; both sets download in one ZIP.</p>
         <div className="row">
           <span className="note">
             {total} {total === 1 ? 'puzzle' : 'puzzles'}
           </span>
           <span className="spacer" />
           <button onClick={onClose}>Cancel</button>
+          <button disabled={busy || total === 0} onClick={receipt}>Download 384px PNG ZIP</button>
           <button className="primary" disabled={busy || total === 0} onClick={print}>
             Print
           </button>

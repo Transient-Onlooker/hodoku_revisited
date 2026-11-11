@@ -476,6 +476,7 @@ export function App() {
         onPrintSolution={() => printing.setPrintSolution(true)}
         onExtendedPrint={() => printing.setExtendedPrintOpen(true)}
         onExportPng={() => void printing.exportPng(game)}
+        onExportReceiptCurrent={() => void printing.exportReceiptCurrent(game)}
         onUndo={() => update(undo)}
         onRedo={() => update(redo)}
         onRestart={() => update(restart)}
@@ -620,6 +621,7 @@ export function App() {
           settings={settings}
           busy={!!busy}
           onPrint={(sections, layout, rating, booklet) => void printing.printBook(sections, layout, rating, booklet)}
+          onExportReceipt={(sections, shuffle) => void printing.exportReceiptBook(sections, shuffle)}
           onClose={() => printing.setExtendedPrintOpen(false)}
         />
       )}

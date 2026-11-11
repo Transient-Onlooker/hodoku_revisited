@@ -200,13 +200,13 @@ export function book(sections: readonly PrintSection[], techniques: readonly str
     for (let i = 0; i < count; i++) {
       const info = section.mode === 'learning' && techniques.length > 0 ? train(level, [...techniques], true, [], rng, 150) : null;
       if (info !== null && info.board) {
-        out.push({ givens: info.puzzle, values: info.board.values, cands: info.board.cands, level: info.level, score: info.score, showCands: section.cands });
+        out.push({ givens: info.puzzle, values: info.board.values, cands: info.board.cands, level: info.level, score: info.score, solution: info.solution, showCands: section.cands });
         continue;
       }
       const playing = fromBank(level, [], rng);
       if (playing === null) continue;
       const board = candsFromGivens(playing.puzzle);
-      out.push({ givens: playing.puzzle, values: board.values, cands: board.cands, level: playing.level, score: playing.score, showCands: section.cands });
+      out.push({ givens: playing.puzzle, values: board.values, cands: board.cands, level: playing.level, score: playing.score, solution: playing.solution, showCands: section.cands });
     }
   }
   return out;

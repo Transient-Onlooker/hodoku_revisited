@@ -103,6 +103,8 @@ export interface PrintSudoku {
   cands: number[];
   level: number;
   score: number;
+  /** Solved grid for the matching receipt-paper answer sheet. */
+  solution?: number[];
   /** from the section: whether to print the candidates */
   showCands: boolean;
 }
