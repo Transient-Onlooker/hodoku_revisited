@@ -25,6 +25,11 @@ function normalize(givens: string): string {
   return puzzle;
 }
 
+/** Direct, readable puzzle URL. Do not mark a typed/printed link as a QR scan. */
+export function puzzlePrintUrl(givens: string): string {
+  return 'https://hodokurevisited.com/play/?P=' + normalize(givens);
+}
+
 /** The text a scanner reads from the code. */
 export function puzzleQrText(givens: string): string {
   return HOST + PATH_QUERY + normalize(givens) + SCAN_MARKER;

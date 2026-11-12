@@ -1,6 +1,6 @@
 import jsQR from 'jsqr';
 import { describe, expect, it } from 'vitest';
-import { drawQr, encodePuzzleQr, puzzleQrText, qrPixelSize, type QrSink } from '../src/qrPuzzle';
+import { drawQr, encodePuzzleQr, puzzlePrintUrl, puzzleQrText, qrPixelSize, type QrSink } from '../src/qrPuzzle';
 import { puzzleFromSearch } from '../src/urlParams';
 
 const GIVENS = '97....4..2..4718.3........5....5..8.5.1.4.2.9.4..8....8........3.9762..8..5....67';
@@ -48,6 +48,14 @@ describe('puzzle QR code', () => {
     expect(puzzleQrText(GIVENS)).toBe(`HTTPS://HODOKUREVISITED.COM/play/?P=${GIVENS}&q=1`);
     expect(puzzleQrText(GIVENS.replace(/\./g, '0'))).toBe(puzzleQrText(GIVENS));
     expect(() => puzzleQrText('123')).toThrow(RangeError);
+  });
+
+  it('provides a printable puzzle URL without QR scan attribution', () => {
+    const url = puzzlePrintUrl(GIVENS);
+    expect(url).toBe('https://hodokurevisited.com/play/?P=' + GIVENS);
+    expect(url).not.toContain('&q=1');
+    expect(puzzleFromSearch(new URL(url).search)).toBe(GIVENS);
+    expect(() => puzzlePrintUrl('123')).toThrow(RangeError);
   });
 
   it('is a 41x41 version 6 symbol that fits the 206px footer at 4px per module', () => {
