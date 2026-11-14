@@ -122,7 +122,7 @@ export function ExtendedPrintDialog({ settings, busy, onPrint, onExportReceipt, 
           Receipt puzzle link
           <select value={linkMode} aria-label="Receipt puzzle link" onChange={(e) => setLinkMode(e.target.value as ReceiptLinkMode)}>
             <option value="qr">QR code</option>
-            <option value="url">Text URL</option>
+            <option value="website">Website address</option>
             <option value="none">No link</option>
           </select>
         </label>
@@ -136,8 +136,8 @@ export function ExtendedPrintDialog({ settings, busy, onPrint, onExportReceipt, 
         </label>
         <p className="note">
           384px receipt PNGs use original givens, matching answer strips and engine ratings.
-          QR strips hold up to 6 puzzles; text URL or no-link strips hold up to 10.
-          Text URLs contain the full puzzle and can be long. The QR footer uses less empty space under each grid.{' '}
+          QR strips hold up to 6 puzzles; website address or no-link strips hold up to 10.
+          QR codes open each exact puzzle; website address prints only hodokurevisited.com.{' '}
           <a href="https://hodokurevisited.com/manual/thermal-printing" target="_blank" rel="noopener noreferrer">Thermal printer setup guide ↗</a>
         </p>
         <div className="row">

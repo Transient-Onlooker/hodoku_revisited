@@ -3,7 +3,7 @@
  * Compact, single-column receipt PNG export using the existing print puzzles.
  */
 import { LEVEL_NAMES, type PrintSudoku } from './protocol';
-import { drawQr, encodePuzzleQr, puzzlePrintUrl } from './qrPuzzle';
+import { drawQr, encodePuzzleQr } from './qrPuzzle';
 
 export const RECEIPT_WIDTH = 384;
 export const RECEIPT_CARD_HEIGHT = 476;
@@ -15,7 +15,7 @@ export const RECEIPT_TEAR_HEIGHT = 56;
 export const RECEIPT_CARDS_PER_STRIP = 6;
 export const RECEIPT_PLAIN_CARDS_PER_STRIP = 10;
 
-export type ReceiptLinkMode = 'qr' | 'url' | 'none';
+export type ReceiptLinkMode = 'qr' | 'website' | 'none';
 export type ReceiptLinkPlacement = 'problems' | 'answers' | 'both';
 
 export interface ReceiptExportOptions {
@@ -164,40 +164,19 @@ function drawCard(ctx: CanvasRenderingContext2D, card: ReceiptCard, y: number, a
   }
 }
 
-/** Wrap an uninterrupted puzzle URL to fit narrow receipt paper. */
-export function wrapReceiptLink(url: string, width: number, measure: (value: string) => number): string[] {
-  const lines: string[] = [];
-  let line = '';
-  for (const char of url) {
-    if (line && measure(line + char) > width) {
-      lines.push(line);
-      line = char;
-    } else {
-      line += char;
-    }
-  }
-  if (line) lines.push(line);
-  return lines;
-}
+/** Brand/domain label in the card margin; only QR codes open individual puzzles. */
+export const RECEIPT_WEBSITE_LABEL = 'hodokurevisited.com';
 
-/** A full direct URL fits in the unused margin below the grid (no extra footer). */
-function drawTextLink(ctx: CanvasRenderingContext2D, card: ReceiptCard, top: number): void {
-  const url = puzzlePrintUrl(card.puzzle.givens);
+function drawWebsiteAddress(ctx: CanvasRenderingContext2D, top: number): void {
   ctx.fillStyle = '#000000';
-  ctx.textAlign = 'left';
+  ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  let rows: string[] = [];
-  for (let px = 10; px >= 8; px--) {
-    ctx.font = '700 ' + px + 'px "DejaVu Sans Mono", monospace';
-    rows = wrapReceiptLink(url, RECEIPT_WIDTH - 26, (part) => ctx.measureText(part).width);
-    if (rows.length <= 3) break;
-  }
-  if (rows.length > 3) throw new Error('The puzzle URL is too long for the 384px receipt card.');
-  rows.forEach((row, index) => ctx.fillText(row, 13, top + 438 + 12 * index));
+  ctx.font = '700 16px "DejaVu Sans Mono", monospace';
+  ctx.fillText(RECEIPT_WEBSITE_LABEL, RECEIPT_WIDTH / 2, top + 445);
 }
 
 const FOOTER_FONT = '"DejaVu Sans Mono", monospace';
-const SITE_TEXT = 'hodokurevisited.com';
+const SITE_TEXT = RECEIPT_WEBSITE_LABEL;
 
 /** QR code on the left, "scan for hints & solution" and the site name on the right. */
 function drawFooter(ctx: CanvasRenderingContext2D, card: ReceiptCard, top: number): void {
@@ -247,7 +226,7 @@ async function makeStrip(cards: readonly ReceiptCard[], answer: boolean, options
     const top = index * step;
     drawCard(ctx, card, top, answer);
     if (withQr) drawFooter(ctx, card, top + RECEIPT_CARD_HEIGHT - RECEIPT_QR_OVERLAP);
-    else if (mode === 'url') drawTextLink(ctx, card, top);
+    else if (mode === 'website') drawWebsiteAddress(ctx, top);
   });
   if (withQr) drawTearOff(ctx, cards.length * step);
   const blob = await new Promise<Blob>((resolve, reject) =>
@@ -373,11 +352,11 @@ export async function downloadReceiptPngs(
       'Hodoku Revisited - 384px thermal receipt export\n' +
       'Puzzle strips are grouped by difficulty and optionally shuffled *within* that difficulty.\n' +
       'The puzzle PNGs come first, followed by paired answer PNGs in the same difficulty order.\n' +
-      'Each 384x476px puzzle can have a QR code, a printed URL, or no link.\n' +
+      'Each 384x476px puzzle can have a QR code, a website address, or no link.\n' +
       'QR mode: up to 6 puzzles per strip; the 206px QR footer overlaps 28px of unused card margin.\n' +
-      'Text URL and no-link modes: up to 10 plain cards per strip.\n' +
+      'Website address and no-link modes: up to 10 plain cards per strip.\n' +
       'Link mode: ' + options.linkMode + '; placement: ' + options.placement + '.\n' +
-      'QR codes include a scan marker; printed text URLs do not.\n' +
+      'QR codes open the exact puzzle; website address prints hodokurevisited.com only.\n' +
       'Difficulty numbers start at #01 within each export; scores come from the HoDoKu engine.\n' +
       'Learning/practicing sections export original givens, not partly solved training boards.\n' +
       'White background; the original desktop glyphs use DejaVu Sans Bold/DejaVu Sans Mono Bold.\n',
